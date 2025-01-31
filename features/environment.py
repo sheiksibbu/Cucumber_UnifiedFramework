@@ -658,17 +658,96 @@
 
 #########   Selenium code is running in headless from now 
 
-import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-import psutil
-import time
-import tempfile
-import os
-import shutil
+# import pandas as pd
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.options import Options
+# import psutil
+# import time
+# import tempfile
+# import os
+# import shutil
 
-# Global result list to track test results
+# # Global result list to track test results
+# test_results = []
+# resource_usage = []
+
+# def log_resource_usage():
+#     """Log CPU and memory usage."""
+#     cpu_usage = psutil.cpu_percent(interval=1)
+#     memory_usage = psutil.virtual_memory().used / (1024 * 1024)
+#     resource_usage.append({"CPU %": cpu_usage, "Memory MB": memory_usage})
+
+# def before_scenario(context, scenario):
+#     """Setup Chrome browser before each scenario."""
+#     chrome_options = Options()
+#     chrome_options.add_argument("--headless")  # Run headless on CI
+#     chrome_options.add_argument("--disable-gpu")
+#     chrome_options.add_argument("--no-sandbox")
+#     chrome_options.add_argument("--disable-dev-shm-usage")
+#     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+
+#     # Temporary user profile directory
+#     user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_user_{os.getpid()}_{int(time.time())}")
+#     chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+#     context.user_data_dir = user_data_dir
+
+#     service = Service()
+#     context.driver = webdriver.Chrome(service=service, options=chrome_options)
+
+#     context.test_name = scenario.name
+#     context.driver.get("https://www.saucedemo.com/v1/")
+#     log_resource_usage()
+
+# def after_scenario(context, scenario):
+#     """Tear down after each scenario."""
+#     test_status = "Pass" if scenario.status == "passed" else "Fail"
+#     reason = getattr(context, "failure_reason", "N/A")
+
+#     test_results.append({
+#         "Test Case Name": context.test_name,
+#         "Status": test_status,
+#         "Reason of Failure": str(reason)
+#     })
+    
+#     log_resource_usage()
+
+#     if context.driver:
+#         context.driver.quit()
+
+#     # Clean up temporary user data directory
+#     if context.user_data_dir and os.path.exists(context.user_data_dir):
+#         shutil.rmtree(context.user_data_dir)
+
+# def after_all(context):
+#     """Save results to CSV."""
+#     results_file = "AutomationResults_Triage.csv"
+#     pd.DataFrame(test_results).to_csv(results_file, index=False)
+#     print(f"Test results saved to '{results_file}'.")
+
+#     usage_file = "ResourceUsageLogs.csv"
+#     pd.DataFrame(resource_usage).to_csv(usage_file, index=False)
+#     print(f"Resource usage logs saved to '{usage_file}'.")
+
+
+
+
+
+
+
+
+
+import os
+import time
+import shutil
+import psutil
+import pandas as pd
+import tempfile
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+
+# Global result list to track test results and resource usage
 test_results = []
 resource_usage = []
 
@@ -681,17 +760,21 @@ def log_resource_usage():
 def before_scenario(context, scenario):
     """Setup Chrome browser before each scenario."""
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run headless on CI
+    chrome_options.add_argument("--headless")  # Run headless in CI/CD
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+
+    # Ensure Chrome binary path compatibility for CI environments
+    chrome_options.binary_location = "/usr/bin/google-chrome"
 
     # Temporary user profile directory
     user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_user_{os.getpid()}_{int(time.time())}")
     chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
     context.user_data_dir = user_data_dir
 
+    # Use Selenium Manager for ChromeDriver path management
     service = Service()
     context.driver = webdriver.Chrome(service=service, options=chrome_options)
 
@@ -709,7 +792,7 @@ def after_scenario(context, scenario):
         "Status": test_status,
         "Reason of Failure": str(reason)
     })
-    
+
     log_resource_usage()
 
     if context.driver:
@@ -728,6 +811,7 @@ def after_all(context):
     usage_file = "ResourceUsageLogs.csv"
     pd.DataFrame(resource_usage).to_csv(usage_file, index=False)
     print(f"Resource usage logs saved to '{usage_file}'.")
+
 
 
 
