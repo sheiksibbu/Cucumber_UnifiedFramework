@@ -19,13 +19,18 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8.16'  # Specify the Python version you need
+        python-version: '3.8.16'
 
     - name: Install dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip xvfb
+        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install ./google-chrome-stable_current_amd64.deb
+        google-chrome --version
         python -m pip install --upgrade pip
-        pip install behave  # Install Behave
-        pip install -r requirements.txt  # Install any other dependencies from requirements.txt
+        pip install behave
+        pip install -r requirements.txt
 
     - name: Run Behave tests
-      run: behave features --tags=@Smoke12345
+      run: xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' behave features --tags=@Smoke12345
