@@ -28,4 +28,4 @@ jobs:
         pip install -r requirements.txt  # Install any other dependencies from requirements.txt
 
     - name: Run Behave tests
-      run: behave --tags=@Smoke12345
+      run: behave features --tags=@Smoke12345
