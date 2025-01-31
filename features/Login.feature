@@ -14,9 +14,11 @@ Feature: Login to OrangeHRM and verify home page
     And the dashboard should display OrangeHRM Logo
 
 
-    @Login @Smoke1234
+    
+  @Login @Smoke12345
 
-  Scenario: Successful login and home page verification
+  Scenario: Successful login and home page verification2
+
     Given the user navigates to the OrangeHRM login page
     When the user enters valid credentails
     And clicks the Login buttton
