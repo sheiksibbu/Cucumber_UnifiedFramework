@@ -394,11 +394,91 @@
 
 
 
+# import pandas as pd
+# from selenium import webdriver
+# from selenium.webdriver.chrome.options import Options
+# import psutil
+# import time
+
+# # Global result list to track test results
+# test_results = []
+
+# # Global variable to track system resource usage
+# resource_usage = []
+
+
+# def log_resource_usage():
+#     """Log CPU and Memory usage during each scenario."""
+#     cpu_usage = psutil.cpu_percent(interval=1)
+#     memory_usage = psutil.virtual_memory().used / (1024 * 1024)
+#     resource_usage.append({"CPU %": cpu_usage, "Memory MB": memory_usage})
+
+
+# def before_scenario(context, scenario):
+#     """Launch the Flipkart URL with Chrome options and start resource monitoring."""
+#     chrome_options = Options()
+#     chrome_options.add_argument("--start-maximized")
+#     chrome_options.add_argument("--disable-notifications")
+#     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+#     context.driver = webdriver.Chrome(options=chrome_options)
+
+#     context.test_name = scenario.name
+#     context.module_name = "Login Module"
+
+#     context.driver.maximize_window()
+#     context.driver.get("https://www.saucedemo.com/v1/")
+
+#     # Log initial resource usage
+#     log_resource_usage()
+
+
+# def after_scenario(context, scenario):
+#     """Capture test status and log resource usage after each scenario."""
+#     test_status = "Pass" if scenario.status == "passed" else "Fail"
+#     reason = getattr(context, "failure_reason", "N/A")
+
+#     # Append test result
+#     test_results.append({
+#         "Test Case Name": context.test_name,
+#         "Module": context.module_name,
+#         "Status": test_status,
+#         "Reason of Failure": str(reason)
+#     })
+
+#     # Log final resource usage
+#     log_resource_usage()
+
+#     # Quit driver after scenario
+#     if context.driver:
+#         context.driver.quit()
+
+
+# def after_all(context):
+#     """Write test results and resource usage to CSV files."""
+#     # Write test results to CSV
+#     results_file = "/home/sheiksibgathulla/PycharmProjects/Cucumber_UnifiedFramework/AutomationResults_Triage.csv"
+#     pd.DataFrame(test_results).to_csv(results_file, index=False)
+#     print(f"Test results saved to '{results_file}'.")
+
+#     # Write resource usage logs to CSV
+#     usage_file = "/home/sheiksibgathulla/PycharmProjects/Cucumber_UnifiedFramework/ResourceUsageLogs.csv"
+#     pd.DataFrame(resource_usage).to_csv(usage_file, index=False)
+#     print(f"Resource usage logs saved to '{usage_file}'.")
+
+
+
+
+#############   new Selenium Manager Code
+
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import psutil
 import time
+import tempfile
+import os
+import shutil
 
 # Global result list to track test results
 test_results = []
@@ -406,22 +486,28 @@ test_results = []
 # Global variable to track system resource usage
 resource_usage = []
 
-
 def log_resource_usage():
     """Log CPU and Memory usage during each scenario."""
     cpu_usage = psutil.cpu_percent(interval=1)
     memory_usage = psutil.virtual_memory().used / (1024 * 1024)
     resource_usage.append({"CPU %": cpu_usage, "Memory MB": memory_usage})
 
-
 def before_scenario(context, scenario):
-    """Launch the Flipkart URL with Chrome options and start resource monitoring."""
+    """Launch the URL with Chrome options and start resource monitoring."""
+    global user_data_dir
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    context.driver = webdriver.Chrome(options=chrome_options)
-
+    
+    # Create a unique temporary directory for the user data
+    user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_user_data_{os.getpid()}_{time.time()}")
+    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+    
+    # Use Selenium Manager to manage the WebDriver binaries
+    service = Service(executable_path=webdriver.ChromeDriverManager().install())
+    
+    context.driver = webdriver.Chrome(service=service, options=chrome_options)
     context.test_name = scenario.name
     context.module_name = "Login Module"
 
@@ -431,9 +517,9 @@ def before_scenario(context, scenario):
     # Log initial resource usage
     log_resource_usage()
 
-
 def after_scenario(context, scenario):
     """Capture test status and log resource usage after each scenario."""
+    global user_data_dir
     test_status = "Pass" if scenario.status == "passed" else "Fail"
     reason = getattr(context, "failure_reason", "N/A")
 
@@ -451,7 +537,10 @@ def after_scenario(context, scenario):
     # Quit driver after scenario
     if context.driver:
         context.driver.quit()
-
+    
+    # Clean up the user data directory
+    if user_data_dir and os.path.exists(user_data_dir):
+        shutil.rmtree(user_data_dir)
 
 def after_all(context):
     """Write test results and resource usage to CSV files."""
@@ -464,7 +553,3 @@ def after_all(context):
     usage_file = "/home/sheiksibgathulla/PycharmProjects/Cucumber_UnifiedFramework/ResourceUsageLogs.csv"
     pd.DataFrame(resource_usage).to_csv(usage_file, index=False)
     print(f"Resource usage logs saved to '{usage_file}'.")
-
-
-
-
