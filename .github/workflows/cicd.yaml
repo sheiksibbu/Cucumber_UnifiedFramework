@@ -17,15 +17,18 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8.16'  # Specify the Python version you need
+        python-version: '3.8.16'
 
     - name: Install dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb chromium-chromedriver
         python -m pip install --upgrade pip
-        pip install behave  # Install Behave
-        pip install -r requirements.txt  # Install any other dependencies from requirements.txt
+        pip install -r requirements.txt
 
     - name: Run Behave tests
-      run: behave features --tags=@Smoke12345
+      env:
+        DISPLAY: :99.0
+      run: xvfb-run --auto-servernum behave features --tags=@Smoke12345
