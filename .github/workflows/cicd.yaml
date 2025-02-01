@@ -1,6 +1,9 @@
 name: Behave Tests
 
 on:
+  schedule:
+    - cron: '57 01 01 02 *'  # Scheduled for February 1, 2025, at 1:28 AM UTC
+
   push:
     branches:
       - master
