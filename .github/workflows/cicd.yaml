@@ -2,8 +2,10 @@ name: Behave Tests
 
 on:
   schedule:
-    - cron: '57 01 01 02 *'  # Scheduled for February 1, 2025, at 1:28 AM UTC
+    # Schedule to run at 1:06 AM UTC daily
+    - cron: '9 1 * * *'  
 
+  workflow_dispatch:  # Allow manual trigger
   push:
     branches:
       - master
