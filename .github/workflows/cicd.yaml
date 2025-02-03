@@ -6,11 +6,13 @@ name: Behave Tests
 
 on:
   schedule:
-    # Schedule to run at 1:11 AM UTC on February 3rd
-    - cron: '12 1 3 2 *'  
+    # Schedule to run at 1:06 AM UTC daily
+    - cron: '9 1 * * *'  
+
+
+
 
   workflow_dispatch:  # Allow manual trigger
-
   push:
     branches:
       - master
