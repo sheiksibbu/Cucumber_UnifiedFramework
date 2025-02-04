@@ -656,9 +656,13 @@
 
 
 
+
 ###########################     Selenium code 
 
 
+
+
+#########   Selenium code is running in headless from now 
 
 
 # import pandas as pd
@@ -814,3 +818,11 @@ def after_all(context):
     usage_file = "ResourceUsageLogs.csv"
     pd.DataFrame(resource_usage).to_csv(usage_file, index=False)
     print(f"Resource usage logs saved to '{usage_file}'.")
+
+
+
+
+
+
+
+
