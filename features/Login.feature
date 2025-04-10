@@ -1,6 +1,6 @@
 @Smoke
 
-Feature: Login to OrangeHRM and verify home page
+Feature: Login to OrangeHRM and verify home pages
 
 
 
